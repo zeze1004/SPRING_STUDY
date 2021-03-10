@@ -1,6 +1,9 @@
 package hello.core;
 
+import hello.core.discount.DiscountPolicy;
 import hello.core.discount.FixDiscountPolicy;
+import hello.core.discount.RateDiscountPolicy;
+import hello.core.member.MemberRepository;
 import hello.core.member.MemberService;
 import hello.core.member.MemberServiceImpl;
 import hello.core.member.MemoryMemberRepository;
@@ -12,10 +15,19 @@ public class AppConfig {
     // 사용하기 전 생성자 주입 필요
 
     public MemberService memberService() {
-        return new MemberServiceImpl(new MemoryMemberRepository());
+        return new MemberServiceImpl(memberRepository());
+    }
+
+    private MemberRepository memberRepository() {
+        return new MemoryMemberRepository();
     }
 
     public OrderService orderService() {
-        return new OrderServiceImpl(new MemoryMemberRepository(), new FixDiscountPolicy());
+        return new OrderServiceImpl(memberRepository(), discountPolicy());
+    }
+
+    // DiscountPolicy 추가 -> orderService()의 반환값 인자로 선언해서 한 눈에 역할이 보이게 리팩토링
+    public DiscountPolicy discountPolicy() {
+        return new RateDiscountPolicy();
     }
 }

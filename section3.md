@@ -52,7 +52,7 @@ test를 원하는 클래스 이름에 `ctrl + shift + t`를 누르면 자동으�
   }
   ```
 
-  ![image-20210310010103186](C:\Users\thwjd\AppData\Roaming\Typora\typora-user-images\image-20210310010103186.png)
+  ![섹션3_1](C:\Project\SPRING_STUDY\섹션3_1.png)
 
 
 
@@ -100,7 +100,7 @@ test를 원하는 클래스 이름에 `ctrl + shift + t`를 누르면 자동으�
 
 
 
-##### 관심사의 분리
+### 관심사의 분리
 
 - 각각의 인터페이스가 배역이라고 할 때, 여러 배우를 구현체라고 할 수 있다.
 
@@ -263,13 +263,259 @@ test를 원하는 클래스 이름에 `ctrl + shift + t`를 누르면 자동으�
     **이게 맞낭...? **
 
     => 관심사 분리: 객체 생성하고 연결하는 역할(AppConfig)와 실행(인터페이스 내의 필드 ex.`MemberServiceImpl`, `MemberService`)가 명확히 분리
+  
+  
+  
+  ##### OrderApp
+  
+  - appConfig를 호출하면 되므로 인터페이스와 구현 분리
+  
+  ```java
+  public class OrderApp {
+      public static void main(String[] args) {
+          AppConfig appConfig = new AppConfig();
+          MemberService memberService = appConfig.memberService();
+          OrderService orderService = appConfig.orderService();
+  
+  //        MemberService memberService = new MemberServiceImpl(null);
+  //        OrderService orderService = new OrderServiceImpl(null, null);
+  
+          Long memberId = 1L;
+          Member member = new Member(memberId, "zeze", Grade.VIP);
+          memberService.join(member);
+  
+          Order order = orderService.createOrder(memberId, "love",10000);
+  
+          System.out.println("order = " + order); // toString으로 묶어놔서 개체 모두 출력된다
+          System.out.println("order.calculatePrice() = " + order.calculatePrice()); // 할인된 가격
+      }
+  }
+  ```
+  
+  ##### test 코드 수정
+  
+  ##### MemberServiceTest, OrderServiceTest
+  
+  ```java
+  public class MemberServiceTest {
+  //    MemberService memberService = new MemberServiceImpl();
+      MemberService memberService;
+  
+      // 테스트 전에 무조건 실행
+      @BeforeEach
+      // 테스트하기 전에 appConfig 만들기
+      public void beforeEach() {
+          AppConfig appConfig = new AppConfig();
+          memberService = appConfig.memberService();
+      }
+  ...
+      
+  public class OrderServiceTest {
+      MemberService memberService;
+      OrderService orderService;
+  
+      @BeforeEach
+      // 테스트하기 전에 appConfig 만들기
+      public void beforeEach() {
+          AppConfig appConfig = new AppConfig();
+          memberService = appConfig.memberService();
+          orderService = appConfig.orderService();
+      }  
+  ...
+  ```
+  
+  ##### 정리
+  
+  - `AppConfig`는 공연기획자면 관심사 분리 시킴
+  
+    구체 클래스를 선택해 배역에 맞는 담당 배우 선택해 전체 동작 구성 책임짐
+  
+  - `OrderServiceImpl`은 객체생성, 의존관계 고민 등을 하지X
+  
+    기능 실행하는 책임만 지면 됨(배우)
+  
+    
+  
+  ##### 의존관계 주입(DI)
+  
+  - `AppConfig`객체가 `memoryMemberRepository` 객체 생성하고  참조값을 `MemberServiceImpl` 생성하면서 생성자로 전달
+  - 클라이언트인 `MemberServiceImpl` 입장에서는 의존관계를 외부에서 주입되는 것과 같다고 하여 의존관계 주입이라 함 
 
-​		
 
-##### 의존관계 주입(DI)
 
-- `AppConfig`객체가 `memoryMemberRepository` 객체 생성하고  참조값을 `MemberServiceImpl` 생성하면서 생성자로 전달
-- 클라이언트인 `MemberServiceImpl` 입장에서는 의존관계를 외부에서 주입되는 것과 같다고 하여 의존관계 주입이라 함 
+### AppConfig 리팩터링
+
+- AppConfig에는 각 역할들이 한 눈에 보이도록 설계해야 하는데 기존 코드는 그렇지 않음
+
+  예) `MemoryMemberRepository()`의 역할이 보이지 x
+
+  ```java
+  // 기존 코드
+  // application 전체 설정, 구성
+  public class AppConfig {
+      // 사용하기 전 생성자 주입 필요
+  
+      public MemberService memberService() {
+          return new MemberServiceImpl(new MemoryMemberRepository());
+      }
+  
+      public OrderService orderService() {
+          return new OrderServiceImpl(new MemoryMemberRepository(), new FixDiscountPolicy());
+      }
+  }
+  ```
+
+  
+
+  예) MemoryMemberRepository() 리팩토링
+
+  리팩토링을 원하는 메서드 위에서 `ctrl + alt + m`
+
+  리턴값은 구체클래스가 아닌 인터페이스 선택
+
+  ![섹션3_2](C:\Project\SPRING_STUDY\섹션3_2.png)
+
+  ```java
+  // 리팩토링 후
+  
+  // application 전체 설정, 구성
+  public class AppConfig {
+      // 사용하기 전 생성자 주입 필요
+  
+      public MemberService memberService() {
+          return new MemberServiceImpl(memberRepository());
+      }
+  	// DB 변경시 MemoryMemberRepository()만 바꾸면 됨
+      private MemberRepository memberRepository() {
+          return new MemoryMemberRepository();
+      }
+  
+      public OrderService orderService() {
+          return new OrderServiceImpl(memberRepository(), discountPolicy());
+      }
+  
+      // DiscountPolicy 추가 -> orderService()의 반환값 인자로 선언해서 한 눈에 역할이 보이게 리팩토링
+      // 할인 정책 바꿀 시 FixDiscountPolicy()만 바꾸면 됨
+      public DiscountPolicy discountPolicy() {
+          return new  FixDiscountPolicy();
+      }
+  }
+  ```
+
+  - 메서드 명만 봐도 역할을 알 수 있음
+
+    역할과 구현클래스(return 되는 클래스, 클래스 내의 인자가 인터페이스)가 구분이 명확함
+
+    => 전체 구성을 쉽게 파악 가능
+
+  - 가령 DB나 할인 정책을 바꿀 때 간단하게 리팩토링 가능
+
+  - `new MemoryMemberRepository()` 중복 제거하여
+
+     `MemoryMemberRepository()`를 다른 구현체로 변경할 때 한 부분만 변경하면 됨
+
+
+
+
+
+### 새로운 구조와 할인 정책 적요
+
+- 정액 할인 정책을 정률% 할인 정책으로 변경
+
+  `FixDiscountPolicy()` -> `RateDiscountPolicy()`
+
+  ##### AppConfig
+
+  ```java
+  ...
+      // 할인 정책 변경
+      public DiscountPolicy discountPolicy() {
+          // return new FixDiscountPolicy();
+      	return new RateDiscountPolicy();
+      }
+  ...  
+  ```
+
+  - 클라이언트 코드인 `OrderServiceImpl`을 포함해 **사용영역**의 코드 변경 필요x
+  - **구현영역**만 수정하면 됨
+
+
+
+
+
+### 전체 흐름 정리
+
+- 새로운 할인 정책 개발
+
+  문제점:
+
+  정률 할인 정책을 적용할려고 하니 클라이언트 코드도 수정했어야 함
+
+  
+
+
+
+
+
+### 좋은 객체 지향 설계의 5가지 원칙 적용
+
+- 이 중 3가지 적용
+
+	##### 	SRP 단일 책임 원칙
+
+​	한 클래스는 하나의 책임만 가질 걳
+
+​	`AppConfig`: 구현 객체 생성과 연결하는 책임
+
+​	`클라이언트 객체`: 실행하는 책임만 담당
+
+##### 	DIP 의존관계 역전 원칙
+
+​	추상화에 의존해야지, 구체화에 의존X
+
+​	추상화에 의존하고 의존관계 구체화 구현 클래스 선택은 외부에서 주입해야 함
+
+	##### 	OCP
+
+​	애플리케이션을 사용영역과 구성영역으로 나눠서 구분
+
+​	`AppConfig`에서 할인 정책을 변경해서 의존관계가 바뀐 채(구현 클래스가 바뀐 채) 	클라이언트 코드에 주입해도 클라이언트 코드는 변경 X
+
+​	=> **소프트웨어 요소를 새롭게 확장해도 사용 영역 변경은 닫혀 있음**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

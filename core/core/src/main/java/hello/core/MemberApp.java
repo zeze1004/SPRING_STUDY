@@ -8,7 +8,9 @@ import hello.core.member.MemberServiceImpl;
 public class MemberApp {
 
     public static void main(String[] args) {
-        MemberService memberService = new MemberServiceImpl();
+        AppConfig appConfig = new AppConfig();
+        MemberService memberService = appConfig.memberService();
+//        MemberService memberService = new MemberServiceImpl(); // AppConfig에서 생성해서 만들 필요x
         Member member = new Member(1L, "zeze", Grade.VIP);
         memberService.join(member);
 
