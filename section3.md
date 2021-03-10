@@ -455,8 +455,6 @@ test를 원하는 클래스 이름에 `ctrl + shift + t`를 누르면 자동으�
 
 
 
-
-
 ### 좋은 객체 지향 설계의 5가지 원칙 적용
 
 - 이 중 3가지 적용
@@ -487,25 +485,88 @@ test를 원하는 클래스 이름에 `ctrl + shift + t`를 누르면 자동으�
 
 
 
+### IoC, DI 그리고 컨테이너
+
+
+
+##### 제어의 역전
+
+- 개발자가 객체 생성, 호출 등 직접 컨트롤 하지만 프레임워크가 대신 관리해줘서 제어권이 뒤바뀌는 것을 뜻함
+- `AppConfig`가 등장한 
+- **예를 들어서 OrderServiceImpl 은 필요한 인터페이스들을 호
+  출하지만 어떤 구현 객체들이 실행될지 모른다.** // 무슨 말 ㅠㅠ
+
+
+
+##### 의존관계 주입 DI
+
+`OrderServiceImpl`는 `MemberRepository`와 `DiscountPolicy` 인터페이스에만 의존
+
+=> 실제 어떤 구현 객체가 사용될지 알 수 x
+
+​	 가령, `DiscountPolicy` 인터페이스에 `RateDiscountPolicy`가 들어올지 `FixDiscountPolicy`가 들어올지 알 수 x
+
+```java
+// AppConfig
+...
+    public OrderService orderService() {
+        return new OrderServiceImpl(memberRepository(), discountPolicy());
+    }
+```
+
+
+
+- 의존관계는 정적인 클래스 의존관계와 실행 시점에 결정되는 동적인 객
+
+- 의존관계 주입을 사용하면 클라이언트 코드를 변경하지 않고, 클라이언트가 호출하는 대상의 타입 인스턴스를 변경할 수 있음
+
+  ex) 정률 할인 할지, 정액 할인을 할지
+
+- ⭐의존관계 주입을 사용하면 정적인 클래스 의존관계를 변경하지 않고, 동적인 객체 인스턴스 의존관계를 쉽게 변경할 수 있다.⭐
+
+  => 정적인 클래스 다이어그램은 변경 x + 애플리케이션 코드 수정 x
+
+  ​	실행 시 생성되는 객체 다이어그램만 변경할 수 있음
+
+
+
+##### IoC 컨테이너, DI 컨테이너
+
+- `AppConfig`와 같이 의존관계 역전시키고 의존관계 주입을 해줌
+
+  IoC는 여러 군데에서 일어나므로 DI 컨테이너라고 불림
+
+  ```java
+  // AppConfig
+  ...
+      public OrderService orderService() {
+      return new OrderServiceImpl(memberRepository(), discountPolicy());
+      }
+      
+  ```
+
+  `OrderServiceImpl` 객체 생성할 때 생성자인 `memberRepository()`, `discountPolicy()` 주입 시켜 줌
 
 
 
 
 
+### 스프링 전환하기
 
 
 
+- 스프링 컨테이너에 등록
 
+  ![섹션3_3](C:\Project\SPRING_STUDY\섹션3_3.png)
 
+- `ApplicationContext`: 스프링 컨테이너
 
+  스피링 컨테이너를 사용해 DI
 
+  @Bean을 이용해 스프링 컨테이너에 등록
 
-
-
-
-
-
-
+  - 스프링 컨테이너에 등록된 객체를 스프링 빈이라고 함
+  - 스프링 빈은 `applicationContext.getBean(메서드 명, 타입)`으로 호출할 수 있음
 
 
 
