@@ -8,14 +8,16 @@ import hello.core.member.MemberRepository;
 import hello.core.member.MemoryMemberRepository;
 
 public class OrderServiceImpl implements OrderService {
-    private final MemberRepository memberRepository = new MemoryMemberRepository();
-    // 고정 할인 정책(FixDiscountPolicy())을 없애고 정률 할인 정책으로 바꿈
-    // private final DiscountPolicy discountPolicy = new FixDiscountPolicy();
-    // private final DiscountPolicy discountPolicy = new RateDiscountPolicy();
+    // OrderService를 이용하기 위해서는 두 필드 memberRepository, discountPolicy가 필요함
+    // final은 생성자를 통해 할당
+    private final MemberRepository memberRepository;
+    private final DiscountPolicy discountPolicy;
 
-    // 클라이언트 코드 OrderServiceImpl()가 인터페이스 DiscountPolicy()만 의존하도록 수정
-    // OrderServiceImpl()이 discountPolicy 객체에 FixDiscountPolicy()를 직접 할당
-    private DiscountPolicy discountPolicy = new FixDiscountPolicy();
+    // 생성자
+    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }
 
     // OrderService와 discountPolicy가 분리되어 서로 영향x => 할인 정책 수정시 discountPolicy만 수정하면 됨
     // 단일 체계 원칙을 잘 지킴
