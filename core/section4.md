@@ -344,13 +344,61 @@ ApplicationContext applicationContext = new AnnotationConfigApplicationContext(A
 
 
 
+### 자바가 아닌 XML로 스프링 설정 형식
+
+자바 외에도 XML, Groovy 등으로 설정 형식 만들 수 있음
+
+- 애노테이션 기반 자바 코드 설정
+
+  ```java
+  new AnnotationConfigApplicationContext(AppConfig.class);
+  ```
+
+- XML
+
+  - 자바 파일이 아닌 모든 파일은 `resources`에 저장
+
+    ##### appConfig.xml
+
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+        <bean id = "memberService" class="hello.core.member.MemberServiceImpl">
+            <!--   생성자도 넘겨줘야 함     -->
+            <constructor-arg name="memberRepository" ref = "memberRepository" />
+        </bean>
+    
+        <bean id = "memberRepository" class="hello.core.member.MemoryMemberRepository" />
+        <bean id = "orderService" class="hello.core.order.OrderServiceImpl">
+            <constructor-arg name="memberRepository" ref = "memberRepository" />
+            <constructor-arg name="discountPolicy" ref = "discountPolicy" />
+        </bean>
+        
+        <bean id = "discountPolicy" class="hello.core.discount.RateDiscountPolicy" />
+    </beans>
+    ```
+
+  - XML 테스트 코드
+
+    ```java
+    public class XmlAppContext {
+    
+        @Test
+        void xmlAppContext() {
+            ApplicationContext ac = new GenericXmlApplicationContext("appConfig.xml");
+            MemberService memberService = ac.getBean("memberService", MemberService.class);
+            assertThat(memberService).isInstanceOf(MemberService.class);
+        }
+    }
+    ```
+
+    
 
 
 
-
-
-
-
+### 스프링 빈 설정 메타 정보 - BeanDefinition
 
 
 
