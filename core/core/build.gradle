@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+	implementation 'javax.inject:javax.inject:1'
 	implementation 'org.springframework.boot:spring-boot-starter'
 	//web 라이브러리 추가
 	implementation 'org.springframework.boot:spring-boot-starter-web'
