@@ -6,18 +6,23 @@ import hello.core.discount.RateDiscountPolicy;
 import hello.core.member.Member;
 import hello.core.member.MemberRepository;
 import hello.core.member.MemoryMemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
     // OrderService를 이용하기 위해서는 두 필드 memberRepository, discountPolicy가 필요함
     // final은 생성자를 통해 할당
     private final MemberRepository memberRepository;
     private final DiscountPolicy discountPolicy;
 
-    // 생성자
-    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
-        this.memberRepository = memberRepository;
-        this.discountPolicy = discountPolicy;
-    }
+    // @RequiredArgsConstructor 생성자 메소드 생성
+//    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+//        this.memberRepository = memberRepository;
+//        this.discountPolicy = discountPolicy;
+//    }
 
     // OrderService와 discountPolicy가 분리되어 서로 영향x => 할인 정책 수정시 discountPolicy만 수정하면 됨
     // 단일 체계 원칙을 잘 지킴
@@ -30,5 +35,10 @@ public class OrderServiceImpl implements OrderService {
 
         // 주문 시 회원id, 주문 메뉴, 가격, 할인된 가격 반환
        return new Order(memberId, itemName, itemPrice, discountPrice);
+    }
+
+    // 테스트 용도: 직접 꺼내서 확인해보자
+    public MemberRepository getMemberRepository() {
+        return memberRepository;
     }
 }
