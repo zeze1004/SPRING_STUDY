@@ -55,11 +55,15 @@
 
 ##### 컴포넌트 스캔 기본 대상
 
-@Component : 컴포넌트 스캔에서 사용
-@Controlller : 스프링 MVC 컨트롤러에서 사용
-@Service : 스프링 비즈니스 로직에서 사용
-@Repository : 스프링 데이터 접근 계층에서 사용
-@Configuration : 스프링 설정 정보에서 사용
+`@Component` : 컴포넌트 스캔에서 사용
+
+`@Controlller` : 스프링 MVC 컨트롤러에서 사용
+
+`@Service` : 스프링 비즈니스 로직에서 사용
+
+`@Repository` : 스프링 데이터 접근 계층에서 사용
+
+`@Configuration` : 스프링 설정 정보에서 사용
 
 
 
@@ -67,21 +71,130 @@
 
 - 애노테이션은 메타정보로, 애노테이션이 있으면 부가 기능도 수행함
 
-@Controller : 스프링 MVC 컨트롤러로 인식
-@Repository : 스프링 데이터 접근 계층으로 인식하고, 데이터 계층의 예외를 스프링 예외로 변환
+  `@Controller` : 스프링 MVC 컨트롤러로 인식
 
-=> 다른 디비로 바꿔도 예외처리를 따로 하지 않도로 스프링 예외로 변환 시킴
+  `@Repository` : 스프링 데이터 접근 계층으로 인식하고, 데이터 계층의 예외를 스프링 예외로 변환
 
-@Configuration : 앞서 보았듯이 스프링 설정 정보로 인식하고, 스프링 빈이 싱글톤을 유지하도록 추가 처리를 한다.
-@Service : @Service는 따로 처리 x
+  ​	=> 다른 디비로 바꿔도 예외처리를 따로 하지 않도로 스프링 예외로 변환 시킴
 
-​	=>  대신 개발자들이 핵심 비즈니스 로직이 여기에 있겠구나 라고 비즈니스 계층을 인식하는데 도움을 줌
+  `@Configuration` : 스프링 설정 정보 인식하고, 스프링 빈이 싱글톤을 유지하도록 처리
+  `@Service` : @Service는 따로 처리 x
 
-
+  ​	=>  대신 개발자들이 여기가 핵심 비즈니스 로직임을 인식하는데 도움을 줌
 
 
 
 
 
 ### 필터
+
+- `includeFilters`: `@ComponentScan` 사용시 bean 등록
+- `excludeFilters`: bean 등록x
+
+=> 어노테이션을 직접 등록할 수 있는 기능
+
+
+
+##### 어노테이션 직접 설정
+
+```java
+// @MyIncludeComponent가 붙으면 componentScan에 등록
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface MyIncludeComponent {
+}
+```
+
+```java
+// BeanA
+@MyIncludeComponent
+public class BeanA {
+}
+// BeanB는 @MyExcludeComponent 붙인 채 클래스 생성
+```
+
+##### 생성한 어노테이션 테스트 코드
+
+```java
+// 나만의 컴포넌트 스캔 필터 기능 생성
+public class ComponentFilterAppConfigTest {
+    @Test
+    void filterScan() {
+        ApplicationContext ac = new AnnotationConfigApplicationContext(ComponentFilterAppConfig.class);
+        BeanA beanA = ac.getBean("beanA", BeanA.class);
+        // BeanA는 @MyIncludeComponent 어노테이션이 붙어서 includeFilters 되므로 BEAN 등록
+        assertThat(beanA).isNotNull();
+        // BeanB는 @MyExcludeComponent 붙어서 bean에 등록 되지 않았으므로 예외처리
+        assertThrows(
+                NoSuchBeanDefinitionException.class,
+                () -> ac.getBean("beanB", BeanB.class)
+        );
+    }
+    @Configuration
+    @ComponentScan(
+            // @Filter(type = FilterType.ANNOTATION, ...) 기본값이어서 지워도 됨
+            includeFilters = @Filter(classes = MyIncludeComponent.class),
+            excludeFilters = @Filter(type = FilterType.ANNOTATION, classes = MyExcludeComponent.class)
+    )
+    static class ComponentFilterAppConfig {
+
+    }
+}
+```
+
+- `@Component`로 대부분 처리하므로 필터를 쓸 일이 많지 x
+
+
+
+
+
+### 중복 등록과 충돌
+
+컴포넌트 스캔에서 같은 빈 이름 등록시 생기는 일
+
+1. 자동 빈 등록 vs 자동 빈 등록
+2. 수동 빈 등록 vs 자동 빈 등록
+
+
+
+##### 1. 자동 빈 등록 vs 자동 빈 등록
+
+컴포넌트 스캔에서 자동으로 빈 등록시 빈 이름이 서로 같은 경우 `ConflictingBeanDefinitionExcepion` 예외 발생
+
+=> 자주 없는 상황
+
+
+
+##### 2. 수동 빈 등록 vs 자동 빈 등록
+
+수동 빈 등록이 우선권을 가짐
+
+그러나 이러한 상황이 여러 번 생기면 설정들이 꼬이므로
+
+최근 스프링 부트는 수동 빈 등록과 자동 빈 등록 충돌시 오류가 발생하도록 기본 값 바꿈
+
+```
+// 에러 로그
+Consider renaming one of the beans or enabling overriding by setting
+spring.main.allow-bean-definition-overriding=true
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
