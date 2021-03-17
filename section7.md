@@ -279,7 +279,7 @@ public class AutowiredTest {
 
   
 
-결론: 생성자 주입를 쓰자
+  ##### 결론: 생성자 주입를 쓰자
 
 
 
@@ -364,6 +364,16 @@ public class HelloLombok {
 
 ### 조회 빈이 2개 이상일 시 문제점
 
+- `@Autowired`는 타입(type)으로 조회
+
+  => `ac.getBean()`과 유사하게 동장
+
+- 타입으로 조회하면 같은 타입의 하위 타입이 2개 이상일 때 스프링 빈으로 선언시 문제 발생
+
+  EX) `DiscountPolicy`의 하위 타입인 `FixDiscountPolicy`, `RateDiscountPolicy` 둘 다 빈 등록시
+
+  `NoUniqueBeanDefinitionException` 오류 발생
+
 
 
 
@@ -376,6 +386,63 @@ public class HelloLombok {
 
 
 
+##### 1. @Autowired 필드 명 매칭
+
+- `@Autowired`: 타입 매칭 시도 후 하위 타입에 여러 빈 있으면 필드 이름, 파라미터 이름을 빈 이름에 추가 매칭
+
+  - 타입이 하나면은 바로 의존관계 주입
+
+  - 타입 매칭 결과가 2개 이상이면 필드명, 파라미터 명으로 빈 이름 매칭
+
+    => 같은 이름이 있으면 의존관계 주입
+
+
+
+##### 2. @Quilifier 사용
+
+- 추가 구분자를 붙여주는 방식
+
+- 빈 등록시 `@Qualifier` 붙여 줌
+
+  ```java
+  @Component
+  @Qualifier("mainDiscountPolicy")
+  public class RateDiscountPolicy implements DiscountPolicy {....}
+  ```
+
+- `@Qualifier("명칭")`의 "명칭"끼리 매칭
+
+- "명칭"을 가진 `@Qualifier()`가 없을 시 "명칭"을 가진 빈 이름에 매칭
+
+- 그래도 없을 때에는 `NoSuchBeanDefinitionException` 예외 발생
+
+ 
+
+##### 3. @Primary 사용✨
+
+- `@Autowired` 시 여러 빈 매칭되면 `@Primary`가 우선권을 가짐
+
+- `rateDiscountPolicy`가 우선권을 가지게 만들기
+
+  ```java
+  @Component
+  @Primary
+  public class RateDiscountPolicy implements DiscountPolicy {...}
+  @Component
+  public class FixDiscountPolicy implements DiscountPolicy {...}
+  ```
+
+
+
+##### @Primary, @Qualifier 활용
+
+- 메인 데이터베이스 커넥션은  `@Primary`
+
+- 서브 데이터베이스 커넥션을 획득하는 스프링 빈에는 `@Qualifier` 적용
+
+- 우선순위: `@Qualifier`  > `@Primary`
+
+  `@Qualifier` 가 수동으로 직접 설정해야 하므로
 
 
 
@@ -383,6 +450,7 @@ public class HelloLombok {
 
 
 
+### 애노테이션 직접 만들기
 
 
 
