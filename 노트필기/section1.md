@@ -46,32 +46,30 @@
 
   ##### 다형성을 현실 세계와 비교
 
-  - 운전자 - 자동차
-
-    ![image-20210302165102940](C:\Project\SPRING_STUDY\다형성.png)
+  - 운전자 - 자동차![다형성](C:\Project\SPRING_STUDY\노트필기\image\다형성.png)
 
     - 클라이언트는 대상의 역할(인터페이스)만 알면 된다.
-    - 클라이언트 구현 대상의 내부 구조를 몰라도 된다.
+- 클라이언트 구현 대상의 내부 구조를 몰라도 된다.
     - 클라이언트 구현 대상의 내부 구조가 변경 되어도 영향x
     - 클라이언트는 구현 대상 자체를 변경해도 영향x
-
-    			#### 객체는 협력 관계
+    
+    			객체는 협력 관계
 
     - 혼자 있는 객체는 없음
-    - 클라이언트: **요청**, 서버: **응답**(클라이언트의 요청을 해결한 것)
+- 클라이언트: **요청**, 서버: **응답**(클라이언트의 요청을 해결한 것)
     - 객체 클라이언트와 객체 서버는 서로 협력 관계 가짐
-
+    
     
 
     ## 2. SOLID
 
     |  S   | SRP  | 단일 책임 원칙 (Single responsibility principle) "한 [클래스](https://ko.wikipedia.org/wiki/클래스_(컴퓨터_과학))는 하나의 책임만 가져야 한다." |
-    | :--: | ---- | ------------------------------------------------------------ |
+| :--: | ---- | ------------------------------------------------------------ |
     |  O   | OCP  | **개방-폐쇄 원칙** “소프트웨어 요소는 확장에는 열려 있으나 변경에는 닫혀 있어야 한다.” |
     |  L   | LSP  | [리스코프 치환 원칙 (Liskov substitution principle)](https://ko.wikipedia.org/wiki/리스코프_치환_원칙)“프로그램의 [객체](https://ko.wikipedia.org/wiki/객체)는 프로그램의 정확성을 깨뜨리지 않으면서 하위 타입의 인스턴스로 바꿀 수 있어야 한다.” [계약에 의한 설계](https://ko.wikipedia.org/w/index.php?title=계약에_의한_설계&action=edit&redlink=1)를 참고하라. |
     |  I   | ISP  | [인터페이스 분리 원칙 (Interface segregation principle)](https://ko.wikipedia.org/wiki/인터페이스_분리_원칙)“특정 클라이언트를 위한 인터페이스 여러 개가 범용 인터페이스 하나보다 낫다.”[[4\]](https://ko.wikipedia.org/wiki/SOLID_(객체_지향_설계)#cite_note-martin-design-principles-4) |
     |  D   | DIP  | [의존관계 역전 원칙 (Dependency inversion principle)](https://ko.wikipedia.org/wiki/의존관계_역전_원칙)프로그래머는 “추상화에 의존해야지, 구체화에 의존하면 안된다.”[[4\]](https://ko.wikipedia.org/wiki/SOLID_(객체_지향_설계)#cite_note-martin-design-principles-4) [의존성 주입](https://ko.wikipedia.org/wiki/의존성_주입)은 이 원칙을 따르는 방법 중 하나다. |
-
+  
   1. SRP
 
      - `하나의 책임`은 모호함
