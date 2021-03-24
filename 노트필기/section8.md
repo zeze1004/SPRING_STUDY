@@ -171,6 +171,10 @@ public class BeanLifeCycleTest {
 
 **이 방법을 쓰자!**
 
+`@PostConstruct`: 생성되기 전에
+
+`@PreDestory`: 소멸되기 전에
+
 ```java
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -203,5 +207,5 @@ public class NetworkClient {
 
 외부 라이브러리에 적용x
 
-=> 코드를 고칠 수 없는 외부라이브러리를 사용할 때는 `initMethod , destroyMethod` 사용하자
+=> 코드를 고칠 수 없는 외부라이브러리를 사용할 때는 `initMethod` , `destroyMethod` 사용하자
 

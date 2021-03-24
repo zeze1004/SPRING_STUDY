@@ -20,7 +20,9 @@ public class LogDemoController {
         String requestURL = request.getRequestURI().toString();
         myLogger.setRequestURL(requestURL);
         myLogger.log("controller test");
+        // Thread.sleep(1000); // 1초 씩 아래 로그가 찍히는게 지연됨
         logDemoService.logic("test id");
+
         return "OK";
     }
 }
